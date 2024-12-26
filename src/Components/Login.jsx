@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { signInWithEmailAndPassword } from "firebase/auth";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { auth } from "../firebaseConfig"; // Ensure this imports your Firebase config correctly
 import { toast } from "react-hot-toast"; // Optional for user feedback
+const db = getFirestore();
 export default function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
@@ -17,9 +19,20 @@ export default function Login() {
 
     setLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      toast.success("Login successful");
-      navigate("/dashboard"); // Redirect to a dashboard or another page after login
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = userCredential.user;
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      if (user) {
+        console.log("User details:", user);
+        const userName = user.displayName || "User"; // Use displayName if available, or a fallback
+        const userData = userDoc.data();
+        toast.success("Login successful");
+        navigate("/dashboard", { state: { name: userData.fullName } });
+      }
     } catch (error) {
       console.error("Login error:", error);
       toast.error("Invalid email or password");
