@@ -5,6 +5,7 @@ import { getFirestore, doc, setDoc } from "firebase/firestore";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const db = getFirestore(); // Initialize Firestore
 
@@ -16,9 +17,14 @@ export default function RegistrationForm() {
     confirmPassword: "",
     phoneNumber: "",
   });
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const navigate = useNavigate();
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -119,25 +125,38 @@ export default function RegistrationForm() {
               className="w-full px-4 py-2 mb-4 text-lg border rounded-md text-black placeholder-black border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400"
             />
 
-            {/* Password Field */}
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="**********"
-              className="w-full px-4 py-2 mb-4 text-lg border rounded-md text-black placeholder-black border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400"
-            />
-
-            {/* Confirm Password Field */}
-            <input
-              placeholder="**********"
-              type="password"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              className="w-full px-4 py-2 mb-4 text-lg border rounded-md text-black placeholder-black border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="Password"
+                className="w-full px-4 py-2 mb-4 text-lg border rounded-md text-black placeholder-black border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400"
+              />
+              <span
+                className="absolute right-3 top-3 cursor-pointer text-gray-500"
+                onClick={togglePasswordVisibility}
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </span>
+            </div>
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                placeholder="Confirm Password"
+                className="w-full px-4 py-2 mb-4 text-lg border rounded-md text-black placeholder-black border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400"
+              />
+              <span
+                className="absolute right-3 top-3 cursor-pointer text-gray-500"
+                onClick={togglePasswordVisibility}
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </span>
+            </div>
 
             {/* Address Field */}
             <input

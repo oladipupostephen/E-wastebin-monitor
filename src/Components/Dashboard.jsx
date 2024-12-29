@@ -23,10 +23,13 @@ export default function Dashboard() {
       return;
     }
 
-    // Navigate to details page with selected bin and parameter
-    navigate(`/details`, {
-      state: { bin: selectedBin, parameter: selectedParameter },
-    });
+    if (selectedBin && selectedParameter) {
+      navigate(`/${selectedParameter}`, {
+        state: { bin: selectedBin, parameter: selectedParameter },
+      });
+    } else {
+      alert("Please select a bin and a parameter.");
+    }
   };
 
   return (
