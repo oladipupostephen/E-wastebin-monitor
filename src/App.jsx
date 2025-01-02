@@ -10,6 +10,7 @@ import Weight from "./Components/Weight";
 import Location from "./Components/Location";
 import Temperature from "./Components/Temperature";
 import "./App.css";
+import "leaflet/dist/leaflet.css";
 
 function App() {
   return (
