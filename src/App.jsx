@@ -9,6 +9,7 @@ import Distance from "./Components/Distance";
 import Weight from "./Components/Weight";
 import Location from "./Components/Location";
 import Temperature from "./Components/Temperature";
+import Humidity from "./Components/Humidity";
 import "./App.css";
 import "leaflet/dist/leaflet.css";
 
@@ -26,6 +27,7 @@ function App() {
           <Route path="/Weight" element={<Weight />} />
           <Route path="/Location" element={<Location />} />
           <Route path="/Temperature" element={<Temperature />} />
+          <Route path="/Humidity" element={<Humidity />} />
         </Routes>
       </Router>
     </>

@@ -66,7 +66,7 @@ export default function Dashboard() {
           Select Data Parameter
         </h2>
         <div className="flex justify-center flex-wrap gap-4 break-words whitespace-normal">
-          {["Temperature", "Distance", "Location", "Weight"].map(
+          {["Temperature", "Humidity", "Distance", "Location", "Weight"].map(
             (parameter) => (
               <button
                 key={parameter}

@@ -21,7 +21,11 @@ const Location = () => {
 
       const validLocation = getLastValidLocation(data.feeds);
       if (validLocation) {
-        setLocation(validLocation);
+        const address = await fetchAddress(
+          validLocation.latitude,
+          validLocation.longitude
+        );
+        setLocation({ ...validLocation, address });
       } else {
         setError("No valid location data found.");
       }
@@ -34,8 +38,8 @@ const Location = () => {
   const getLastValidLocation = (feeds) => {
     for (let i = feeds.length - 1; i >= 0; i--) {
       const feed = feeds[i];
-      const latitude = parseFloat(feed.field3);
-      const longitude = parseFloat(feed.field4);
+      const latitude = parseFloat(feed.field4);
+      const longitude = parseFloat(feed.field5);
 
       if (
         latitude &&
@@ -53,6 +57,19 @@ const Location = () => {
       }
     }
     return null;
+  };
+
+  const fetchAddress = async (latitude, longitude) => {
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`
+      );
+      const data = await response.json();
+      return data.display_name || "Address not found";
+    } catch (error) {
+      console.error("Error fetching address:", error);
+      return "Failed to fetch address";
+    }
   };
 
   useEffect(() => {
@@ -90,6 +107,9 @@ const Location = () => {
                 <span className="font-bold">Longitude:</span>{" "}
                 {location.longitude}
               </p>
+              <p className="text-gray-600 sm:col-span-2">
+                <span className="font-bold">Address:</span> {location.address}
+              </p>
               <p className="text-gray-600 col-span-2">
                 <span className="font-bold">Last Updated:</span>{" "}
                 {new Date(location.timestamp).toLocaleString()}
@@ -125,6 +145,7 @@ const Location = () => {
                 <div className="text-sm text-gray-700">
                   <p>Last valid location:</p>
                   <p>{new Date(location.timestamp).toLocaleString()}</p>
+                  <p>{location.address}</p>
                 </div>
               </Popup>
             </Marker>
