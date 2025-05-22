@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
@@ -125,8 +126,7 @@ const Location = () => {
           <MapContainer
             center={[location.latitude, location.longitude]}
             zoom={15}
-            className="h-[500px] w-full rounded-lg shadow-lg border border-green-300"
-          >
+            className="h-[500px] w-full rounded-lg shadow-lg border border-green-300">
             <TileLayer
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               attribution="&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors"
@@ -139,8 +139,7 @@ const Location = () => {
                 iconAnchor: [12, 41],
                 popupAnchor: [1, -34],
                 shadowSize: [41, 41],
-              })}
-            >
+              })}>
               <Popup>
                 <div className="text-sm text-gray-700">
                   <p>Last valid location:</p>
@@ -161,8 +160,7 @@ const Location = () => {
       <div className="text-center mt-10">
         <button
           onClick={fetchLocationData}
-          className="px-8 py-3 bg-green-600 text-white text-lg font-medium rounded-lg shadow-md hover:bg-green-700"
-        >
+          className="px-8 py-3 bg-green-600 text-white text-lg font-medium rounded-lg shadow-md hover:bg-green-700">
           Refresh Location Data
         </button>
       </div>

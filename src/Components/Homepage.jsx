@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React from "react";
 import { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -20,8 +21,7 @@ export default function Homepage() {
         <div className="text-lg font-bold text-white mt-6">
           <button
             className="bg-green-500 py-4 px-10 rounded-lg "
-            onClick={() => navigate("/register")}
-          >
+            onClick={() => navigate("/register")}>
             Getting Started
           </button>
         </div>

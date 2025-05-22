@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from "react";
 import {
   LineChart,
@@ -80,8 +81,7 @@ export default function Humidity() {
         <select
           value={timeRange}
           onChange={(e) => setTimeRange(e.target.value)}
-          className="p-2 border border-gray-300 rounded-md shadow-md"
-        >
+          className="p-2 border border-gray-300 rounded-md shadow-md">
           <option value="1h">Last 1 Hour</option>
           <option value="6h">Last 6 Hours</option>
           <option value="24h">Last 24 Hours</option>
@@ -108,8 +108,7 @@ export default function Humidity() {
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 512 512"
             fill="none"
-            className="w-32 h-32"
-          >
+            className="w-32 h-32">
             <path
               fill="#E5E7EB"
               d="M256 0C114.62 0 0 114.62 0 256s114.62 256 256 256 256-114.62 256-256S397.38 0 256 0zm0 472c-119.1 0-216-96.9-216-216S136.9 40 256 40s216 96.9 216 216-96.9 216-216 216z"
@@ -119,7 +118,6 @@ export default function Humidity() {
               d="M370.1 141.9c-12.5-12.5-32.76-12.5-45.25 0L256 210.7l-68.85-68.8c-12.5-12.5-32.76-12.5-45.25 0s-12.5 32.76 0 45.25L210.7 256l-68.8 68.85c-12.5 12.5-12.5 32.76 0 45.25s32.76 12.5 45.25 0L256 301.3l68.85 68.8c12.5 12.5 32.76 12.5 45.25 0s12.5-32.76 0-45.25L301.3 256l68.8-68.85c12.5-12.5 12.5-32.76 0-45.25z"
             />
           </svg>
-
           <p className="text-gray-600 text-lg">
             No data available for the selected time range.
           </p>

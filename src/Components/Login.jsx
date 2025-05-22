@@ -1,5 +1,6 @@
+/* eslint-disable no-unused-vars */
 import React, { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { auth } from "../firebaseConfig"; // Ensure this imports your Firebase config correctly
@@ -89,8 +90,7 @@ export default function Login() {
               loading ? "opacity-50 cursor-not-allowed" : ""
             }`}
             onClick={handleLogin}
-            disabled={loading}
-          >
+            disabled={loading}>
             {loading ? "Logging in..." : "Login"}
           </button>
           {/* Sign In Link */}
@@ -98,8 +98,7 @@ export default function Login() {
             You do not have an account?{" "}
             <span
               className="text-green-600 font-medium hover:underline cursor-pointer"
-              onClick={() => navigate("/register")}
-            >
+              onClick={() => navigate("/register")}>
               Sign Up
             </span>
           </p>
