@@ -28,11 +28,14 @@ export default function Login() {
       const user = userCredential.user;
       const userDoc = await getDoc(doc(db, "users", user.uid));
       if (user) {
-        console.log("User details:", user);
-        const userName = user.displayName || "User"; // Use displayName if available, or a fallback
         const userData = userDoc.data();
         toast.success("Login successful");
-        navigate("/dashboard", { state: { name: userData.fullName } });
+
+        // Save full name to localStorage
+        localStorage.setItem("userFullName", userData.fullName);
+
+        // Redirect to dashboard without passing state
+        navigate("/dashboard");
       }
     } catch (error) {
       console.error("Login error:", error);

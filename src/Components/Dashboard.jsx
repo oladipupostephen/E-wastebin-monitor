@@ -1,5 +1,7 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable no-unused-vars */
+/* eslint-disable react/prop-types */
+/* eslint-disable no-unused-vars */
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useTheme } from "../ThemeContext";
@@ -11,13 +13,24 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
 } from "recharts";
 import { Sun, Moon, LogOut } from "lucide-react";
 
 export default function Dashboard() {
   const location = useLocation();
   const navigate = useNavigate();
-  const userName = location.state?.name || "User";
+  const [userName, setUserName] = useState("User");
+
+  useEffect(() => {
+    const storedName = localStorage.getItem("userFullName");
+    if (storedName) {
+      setUserName(storedName);
+    }
+  }, []);
+
   const [currentData, setCurrentData] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -36,9 +49,8 @@ export default function Dashboard() {
 
   const [selectedBin, setSelectedBin] = useState(wasteBins[0]);
 
-  // Sign out function
   const handleSignOut = () => {
-    // Add any cleanup here if needed
+    localStorage.removeItem("userFullName"); // Clear stored name
     navigate("/login");
   };
 
@@ -194,6 +206,24 @@ export default function Dashboard() {
     return null;
   };
 
+  // Custom tooltip for pie chart
+  const PieTooltip = ({ active, payload }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div
+          className="border rounded-md p-2 text-sm shadow-lg"
+          style={{
+            backgroundColor: themeColors.cardBg,
+            borderColor: isDark ? "#374151" : "#D1D5DB",
+            color: themeColors.text.primary,
+          }}>
+          <p>{`${payload[0].name}: ${payload[0].value}%`}</p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   // Mini chart component for dashboard
   const MiniChart = ({ dataKey, title, color, unit }) => {
     const [chartData, setChartData] = useState([]);
@@ -226,6 +256,198 @@ export default function Dashboard() {
                       : "field1"
                   ]
                 ),
+              }))
+              .filter((item) => !isNaN(item.value));
+
+            setChartData(validData);
+          }
+        } catch (err) {
+          console.error(`Error fetching ${title} data:`, err);
+        }
+      };
+      fetchChartData();
+    }, [dataKey, title]);
+
+    const currentValue = currentData[dataKey];
+    const hasData =
+      currentValue !== null &&
+      currentValue !== undefined &&
+      !isNaN(currentValue);
+
+    return (
+      <div
+        className="p-6 rounded-xl shadow-lg cursor-pointer transition-all duration-300 hover:shadow-xl hover:scale-105 transform"
+        style={{
+          backgroundColor: themeColors.cardBg,
+          borderLeft: `4px solid ${color}`,
+          boxShadow: isDark
+            ? `0 8px 25px rgba(0, 0, 0, 0.4), 0 0 8px ${color}30`
+            : `0 8px 25px rgba(0, 0, 0, 0.1), 0 0 8px ${color}20`,
+        }}
+        onClick={() => navigateToDetail(title)}>
+        <h3
+          className="text-xl font-bold mb-3"
+          style={{ color: themeColors.text.primary }}>
+          {title}
+        </h3>
+        <div className="flex items-center justify-between">
+          <div className="text-3xl font-bold" style={{ color: color }}>
+            {hasData ? `${currentValue} ${unit}` : "No data"}
+          </div>
+          <div className="w-32 h-20">
+            {chartData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={chartData}>
+                  <Line
+                    type="monotone"
+                    dataKey="value"
+                    stroke={color}
+                    dot={false}
+                    strokeWidth={3}
+                    activeDot={{
+                      r: 6,
+                      fill: color,
+                      stroke: themeColors.cardBg,
+                    }}
+                  />
+                  <Tooltip content={<CustomTooltip />} />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <div
+                className="flex items-center justify-center h-full text-sm"
+                style={{ color: themeColors.text.secondary }}>
+                No trend
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Special waste volume component with pie chart
+  const WasteVolumeChart = ({ dataKey, title, color, unit }) => {
+    const [chartData, setChartData] = useState([]);
+
+    useEffect(() => {
+      const fetchChartData = async () => {
+        try {
+          const response = await fetch(
+            "https://api.thingspeak.com/channels/2792309/feeds.json?results=20"
+          );
+          const data = await response.json();
+
+          if (data.feeds) {
+            const validData = data.feeds
+              .map((feed) => ({
+                time: new Date(feed.created_at).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                }),
+                value: parseFloat(feed.field3),
+              }))
+              .filter((item) => !isNaN(item.value));
+
+            setChartData(validData);
+          }
+        } catch (err) {
+          console.error(`Error fetching ${title} data:`, err);
+        }
+      };
+      fetchChartData();
+    }, [dataKey, title]);
+
+    const currentValue = currentData[dataKey];
+    const hasData =
+      currentValue !== null &&
+      currentValue !== undefined &&
+      !isNaN(currentValue);
+
+    // Prepare pie chart data
+    const pieData = hasData
+      ? [
+          { name: "Filled", value: currentValue, color: color },
+          {
+            name: "Empty",
+            value: 100 - currentValue,
+            color: isDark ? "#374151" : "#E5E7EB",
+          },
+        ]
+      : [];
+
+    return (
+      <div
+        className="p-6 rounded-xl shadow-lg cursor-pointer transition-all duration-300 hover:shadow-xl hover:scale-105 transform"
+        style={{
+          backgroundColor: themeColors.cardBg,
+          borderLeft: `4px solid ${color}`,
+          boxShadow: isDark
+            ? `0 8px 25px rgba(0, 0, 0, 0.4), 0 0 8px ${color}30`
+            : `0 8px 25px rgba(0, 0, 0, 0.1), 0 0 8px ${color}20`,
+        }}
+        onClick={() => navigateToDetail(title)}>
+        <h3
+          className="text-xl font-bold mb-3"
+          style={{ color: themeColors.text.primary }}>
+          {title}
+        </h3>
+        <div className="flex items-center justify-between">
+          <div className="text-3xl font-bold" style={{ color: color }}>
+            {hasData ? `${currentValue} ${unit}` : "No data"}
+          </div>
+          <div className="w-32 h-20">
+            {hasData && pieData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={25}
+                    outerRadius={35}
+                    paddingAngle={2}
+                    dataKey="value">
+                    {pieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip content={<PieTooltip />} />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div
+                className="flex items-center justify-center h-full text-sm"
+                style={{ color: themeColors.text.secondary }}>
+                No data
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Weight card component
+  const WeightCard = ({ dataKey, title, color, unit }) => {
+    const [chartData, setChartData] = useState([]);
+
+    useEffect(() => {
+      const fetchChartData = async () => {
+        try {
+          const response = await fetch(
+            "https://api.thingspeak.com/channels/2792309/feeds.json?results=20"
+          );
+          const data = await response.json();
+
+          if (data.feeds) {
+            const validData = data.feeds
+              .map((feed) => ({
+                time: new Date(feed.created_at).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                }),
+                value: parseFloat(feed.field6),
               }))
               .filter((item) => !isNaN(item.value));
 
@@ -438,8 +660,8 @@ export default function Dashboard() {
           </div>
         ) : (
           <>
-            {/* Data Overview Grid - Fixed layout */}
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
+            {/* First row - Temperature and Humidity */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
               <MiniChart
                 dataKey="temperature"
                 title="Temperature"
@@ -452,13 +674,17 @@ export default function Dashboard() {
                 color={themeColors.sensor?.humidity || "#06B6D4"}
                 unit="%"
               />
-              <MiniChart
+            </div>
+
+            {/* Second row - Waste Volume and Weight */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              <WasteVolumeChart
                 dataKey="distance"
                 title="Waste Volume"
                 color={themeColors.sensor?.distance || "#3B82F6"}
                 unit="%"
               />
-              <MiniChart
+              <WeightCard
                 dataKey="weight"
                 title="Weight"
                 color={themeColors.sensor?.weight || "#F59E0B"}
@@ -466,15 +692,15 @@ export default function Dashboard() {
               />
             </div>
 
-            {/* Location Details Card - Full width, separate row */}
-            <div className="w-full mb-8">
+            {/* Third row - Location alone */}
+            <div className="mb-8">
               {locationError ? (
                 <div className="text-center text-red-400 py-6 text-lg">
                   {locationError}
                 </div>
               ) : binLocation ? (
                 <div
-                  className="w-full p-8 rounded-xl shadow-lg cursor-pointer transition-all duration-300 hover:shadow-xl hover:scale-105 transform"
+                  className="w-full p-6 rounded-xl shadow-lg cursor-pointer transition-all duration-300 hover:shadow-xl hover:scale-[1.02] transform"
                   style={{
                     backgroundColor: themeColors.cardBg,
                     boxShadow: isDark
@@ -483,16 +709,16 @@ export default function Dashboard() {
                     borderTop: `4px solid ${themeColors.text.accent}`,
                   }}
                   onClick={() => navigateToDetail("Location")}>
-                  <h2
-                    className="text-3xl font-bold mb-6"
+                  <h3
+                    className="text-xl font-bold mb-4"
                     style={{ color: themeColors.text.primary }}>
                     📍 Location Details
-                  </h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div className="space-y-2">
+                  </h3>
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <p style={{ color: themeColors.text.secondary }}>
                         <span
-                          className="font-bold text-lg"
+                          className="font-bold"
                           style={{ color: themeColors.text.primary }}>
                           Latitude:
                         </span>{" "}
@@ -500,33 +726,29 @@ export default function Dashboard() {
                       </p>
                       <p style={{ color: themeColors.text.secondary }}>
                         <span
-                          className="font-bold text-lg"
+                          className="font-bold"
                           style={{ color: themeColors.text.primary }}>
                           Longitude:
                         </span>{" "}
                         {binLocation.longitude}
                       </p>
                     </div>
-                    <div className="space-y-2">
-                      <p style={{ color: themeColors.text.secondary }}>
-                        <span
-                          className="font-bold text-lg"
-                          style={{ color: themeColors.text.primary }}>
-                          Last Updated:
-                        </span>{" "}
-                        {new Date(binLocation.timestamp).toLocaleString()}
-                      </p>
-                    </div>
-                    <div className="sm:col-span-2">
-                      <p style={{ color: themeColors.text.secondary }}>
-                        <span
-                          className="font-bold text-lg"
-                          style={{ color: themeColors.text.primary }}>
-                          Address:
-                        </span>{" "}
-                        {binLocation.address}
-                      </p>
-                    </div>
+                    <p style={{ color: themeColors.text.secondary }}>
+                      <span
+                        className="font-bold"
+                        style={{ color: themeColors.text.primary }}>
+                        Last Updated:
+                      </span>{" "}
+                      {new Date(binLocation.timestamp).toLocaleString()}
+                    </p>
+                    <p style={{ color: themeColors.text.secondary }}>
+                      <span
+                        className="font-bold"
+                        style={{ color: themeColors.text.primary }}>
+                        Address:
+                      </span>{" "}
+                      {binLocation.address}
+                    </p>
                   </div>
                 </div>
               ) : (
